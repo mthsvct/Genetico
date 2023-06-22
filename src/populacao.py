@@ -4,6 +4,8 @@ from enchant.utils import levenshtein
 
 class Populacao:
 
+    contador = 0
+
     def __init__(self, modelo, tamanho=10, individuos=[]):
         self.individuos = individuos
         self.tamIndi = len(modelo)
@@ -14,6 +16,9 @@ class Populacao:
         self.media = 0.0
         self.modelo = modelo
         self.ranking = []
+        self.casais = []
+        self.contador = Populacao.contador
+        Populacao.contador += 1
         self.cars = string.ascii_letters + string.digits + string.punctuation + ' '
     
     def __str__(self):
@@ -32,14 +37,29 @@ class Populacao:
                     porcentagem = self.calcula(palavra)
                 self.individuos.append({'plv': palavra, 'pctg': porcentagem })
         self.atualizaDados()
-        self.getRankPropFitness()
+        self.getRankPropRanking()
 
     # Calcula a porcentagem de proximidade do modelo com o individuo
     def calcula(self, palavra):
         comp = levenshtein(palavra, self.modelo)
         r = ((self.tamIndi - comp) / self.tamIndi) * 100
         return r
+
+    def calculaTodos(self):
+        for i in self.individuos:
+            i['pctg'] = self.calcula(i['plv'])
     
+    def criaIndividuos(self, listaPlvs):
+        for plv in listaPlvs:
+            self.individuos.append({'plv': plv, 'pctg': self.calcula(plv)})
+        self.atualizaDados()
+
+        """ if self.contador < 100:
+            self.getRankPropFitness()
+        else:
+            self.getRankPropRanking() """
+        self.getRankPropRanking()
+
     # Atualiza indormações dos cálculos de porcentagem
     def atualizaDados(self):
         self.individuos.sort(key=lambda x: x['pctg'], reverse=True)
@@ -67,7 +87,7 @@ class Populacao:
 
     # Monta o ranking adicionando pesos pela a ordem do valor do fitness.
     def getRankPropRanking(self):
-        p = [40, 25, 15, 7, 5, 3, 2, 1, 1, 1]
+        p = [50, 30, 10, 5, 1, 1, 1, 1, 1]
         ranking = []
         index = 0
         self.ranking = []
