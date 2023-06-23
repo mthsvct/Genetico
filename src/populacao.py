@@ -35,7 +35,7 @@ class Populacao:
                 while porcentagem == 0.0:
                     palavra = self.criaPlv()
                     porcentagem = self.calcula(palavra)
-                self.individuos.append({'plv': palavra, 'pctg': porcentagem })
+                self.individuos.append({'plv': palavra, 'pctg': porcentagem, 'gen': self.contador})
         self.atualizaDados()
         self.getRankPropRanking()
 
@@ -51,13 +51,14 @@ class Populacao:
     
     def criaIndividuos(self, listaPlvs):
         for plv in listaPlvs:
-            self.individuos.append({'plv': plv, 'pctg': self.calcula(plv)})
+            self.individuos.append({'plv': plv, 'pctg': self.calcula(plv), 'gen': self.contador})
         self.atualizaDados()
+        self.getRankPropRanking()
 
-        """ if self.contador < 100:
-            self.getRankPropFitness()
-        else:
-            self.getRankPropRanking() """
+    def postIndividuos(self, lista):
+        for i in lista:
+            self.individuos.append(i)
+        self.atualizaDados()
         self.getRankPropRanking()
 
     # Atualiza indormações dos cálculos de porcentagem
@@ -88,6 +89,7 @@ class Populacao:
     # Monta o ranking adicionando pesos pela a ordem do valor do fitness.
     def getRankPropRanking(self):
         p = [50, 30, 10, 5, 1, 1, 1, 1, 1]
+        # p = [50,50]
         ranking = []
         index = 0
         self.ranking = []

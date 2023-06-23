@@ -17,27 +17,47 @@ class Genetico:
         self.modelo = modelo
         self.tamanho = tamanho
         self.numMaxGeracoes = numMaxGeracoes
+        self.melhores = []
         self.cars = string.ascii_letters + string.digits + string.punctuation + ' '
     
     def run(self):
         primeira = Populacao(modelo=self.modelo, tamanho=self.tamanho, individuos=[])
         primeira.cria()
         self.geracoes.append(primeira)
-
         cont = 1
-
         print(self.geracoes[-1].melhor_individuo['pctg'])
-
         while self.geracoes[-1].melhor_individuo['pctg'] < self.taxaSatisfatoria:
             print(f"Geracao {self.geracoes[-1].contador} - Melhor individuo: \"{self.geracoes[-1].melhor_individuo['plv']}\" - {self.geracoes[-1].melhor_individuo['pctg']}%")
             self.selecao()
             self.crossover()
             cont += 1
 
+            if len(self.melhores) < self.tamanho:
+                # self.geracoes[-1].melhor_individuo['gen'] = self.geracoes[-1].contador
+                self.melhores.append(self.geracoes[-1].melhor_individuo)
+                self.melhores.sort(key=lambda x: x['pctg'], reverse=True)
+            else:
+                if self.melhores[-1]['pctg'] < self.geracoes[-1].melhor_individuo['pctg']:
+                    # self.geracoes[-1].melhor_individuo['gen'] = self.geracoes[-1].contador
+                    self.melhores.insert(0, self.geracoes[-1].melhor_individuo)
+                    self.melhores.sort(key=lambda x: x['pctg'], reverse=True)
+
+                if len(self.melhores) > self.tamanho:
+                    self.melhores.pop()
+            
             if self.numMaxGeracoes != -1 and self.numMaxGeracoes == self.geracoes[-1].contador:
                 break
-                
-            time.sleep(0.1)
+
+            if self.geracoes[-1].contador % 100 == 0:
+                aux = Populacao(modelo=self.modelo, tamanho=self.tamanho, individuos=[])
+                aux.postIndividuos(self.melhores)
+                self.geracoes.append(aux)
+                print("\n\n")
+                for i in aux.individuos:
+                    print(f"{i['plv']} - {i['pctg']}%")
+                # time.sleep(5)
+            
+            # time.sleep(0.01)
 
         self.resultados(cont)
 
@@ -45,6 +65,16 @@ class Genetico:
         print("\n\n")
         print(f"Quantidade de geracoes necessarias: {cont}")
         print(f"Melhor individuo: \"{self.geracoes[-1].melhor_individuo['plv']}\" - {self.geracoes[-1].melhor_individuo['pctg']}%")            
+        print('\n\n')
+        print("Individuos:")
+        for i in self.geracoes[-1].individuos:
+            print(f"{i['gen']}ª gen - {i['plv']} - {i['pctg']}%")
+        print('\n\n')
+        print("Melhores:")
+        for i in self.melhores:
+            print(f"{i['plv']} - {i['pctg']}%")
+        print('\n\n')
+
 
     def selecao(self):
         sel = []
